@@ -8,6 +8,7 @@
 | [0002](0002-frontend.md)         | フロントエンドに React + TypeScript + Vite、CodeMirror 6 を採用する | 承認 |
 | [0003](0003-rendering.md)        | レンダリングはローカルの plantuml.jar を既定とする                  | 承認 |
 | [0004](0004-license.md)          | MIT ライセンスで公開し、PlantUML は MIT 版を利用する                | 承認 |
+| [0005](0005-drop-macos.md)       | macOS をサポート対象外とする                                        | 承認 |
 
 ## 書き方
 

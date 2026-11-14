@@ -34,13 +34,7 @@ cargo --version
 java -version
 ```
 
-### macOS
-
-```bash
-xcode-select --install
-brew install node rustup openjdk@21
-rustup-init -y
-```
+> macOS は対象外です（[ADR-0005](docs/adr/0005-drop-macos.md)）。macOS 向けの手順・不具合対応は提供しません。
 
 ## 2. 起動とテスト
 

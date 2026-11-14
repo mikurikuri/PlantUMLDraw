@@ -23,7 +23,7 @@ D6（公開アカウント）は会社の OSS 公開ポリシー確認後に Git
 - [x] Tauri 2 + React + TS の雛形作成
 - [x] Lint・フォーマッター設定（ESLint / Prettier / rustfmt / clippy）
 - [x] サンプルテスト（Rust：`app_info` `file_type`、TS：`fileTypes` `App`）
-- [x] GitHub Actions CI（3 OS）定義
+- [x] GitHub Actions CI（Windows / Linux）定義
 - [x] アプリアイコン生成（`npm run tauri icon app-icon.svg`。モバイル用は削除）
 - [x] ADR 0001〜0004 作成
 - [x] `CONTRIBUTING.md` 作成
@@ -34,7 +34,7 @@ D6（公開アカウント）は会社の OSS 公開ポリシー確認後に Git
 | ----- | ----------------------------------------------------- | ---- | ---------- | --------------------------------------------------------------- |
 | AC0-1 | 手順書どおりに `npm run tauri dev` でウィンドウが開く | 合格 | 2026-11-15 | Windows 11。winget で導入後に起動、IPC 経由で v0.1.0 表示を確認 |
 | AC0-2 | Rust・TS のサンプルテストが成功する                   | 合格 | 2026-11-15 | Vitest 13 件、cargo test 4 件。lint・clippy・fmt も指摘なし     |
-| AC0-3 | CI が 3 OS で成功する                                 | 未   |            | GitHub リポジトリ作成待ち（D6）                                 |
+| AC0-3 | CI が Windows・Linux で成功する                       | 未   |            | GitHub リポジトリ作成待ち（D6）                                 |
 | AC0-4 | ADR 0001〜0004 が承認済み                             | 合格 | 2026-11-15 | 推奨案で承認                                                    |
 
 ## 確認時の環境
