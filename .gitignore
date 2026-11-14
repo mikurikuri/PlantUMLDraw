@@ -1,0 +1,22 @@
+# Node
+node_modules/
+dist/
+coverage/
+*.log
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# PlantUML 本体（各自で配置）
+*.jar
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code ローカル設定
+.claude/settings.local.json
