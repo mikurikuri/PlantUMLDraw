@@ -1,0 +1,123 @@
+@startuml
+' 性能確認用：約 100 行のクラス図（AC1-1 / AC1-2）
+title 注文管理システム（サンプル）
+class Entity1 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity2 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity3 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity4 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity5 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity6 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity7 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity8 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity9 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity10 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity11 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity12 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity13 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity14 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity15 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity16 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity17 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity18 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity19 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+class Entity20 {
+  - id : Long
+  - name : String
+  + save() : void
+}
+Entity1 --> Entity2 : uses
+Entity2 --> Entity3 : uses
+Entity3 --> Entity4 : uses
+Entity4 --> Entity5 : uses
+Entity5 --> Entity6 : uses
+Entity6 --> Entity7 : uses
+Entity7 --> Entity8 : uses
+Entity8 --> Entity9 : uses
+Entity9 --> Entity10 : uses
+Entity10 --> Entity11 : uses
+Entity11 --> Entity12 : uses
+Entity12 --> Entity13 : uses
+Entity13 --> Entity14 : uses
+Entity14 --> Entity15 : uses
+Entity15 --> Entity16 : uses
+Entity16 --> Entity17 : uses
+Entity17 --> Entity18 : uses
+Entity18 --> Entity19 : uses
+Entity19 --> Entity20 : uses
+@enduml

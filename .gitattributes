@@ -1,3 +1,6 @@
 * text=auto eol=lf
 *.ico binary
 *.png binary
+
+# バイト列を保持するテスト用フィクスチャ
+tests/fixtures/*.puml -text

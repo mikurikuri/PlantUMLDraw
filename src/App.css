@@ -1,17 +1,19 @@
 :root {
   --bg: #f7f8fa;
+  --panel: #ffffff;
+  --editor-bg: #ffffff;
+  --active-line: #f2f4f8;
   --fg: #1f2328;
   --muted: #656d76;
   --accent: #4f6ef7;
+  --accent-fg: #ffffff;
   --danger: #cf222e;
+  --danger-bg: #ffebe9;
+  --warn-bg: #fff8c5;
   --border: #d0d7de;
-  font-family:
-    "Segoe UI",
-    "Hiragino Sans",
-    "Noto Sans JP",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  --mono: "Cascadia Code", "Consolas", "BIZ UDGothic", "Noto Sans Mono CJK JP", monospace;
+  font-family: "Segoe UI", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  font-size: 14px;
   color: var(--fg);
   background: var(--bg);
 }
@@ -19,10 +21,16 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #16181d;
+    --panel: #1d2026;
+    --editor-bg: #1b1e24;
+    --active-line: #242833;
     --fg: #e6edf3;
     --muted: #8d96a0;
     --accent: #7c93ff;
+    --accent-fg: #0d1117;
     --danger: #ff7b72;
+    --danger-bg: #3d1f22;
+    --warn-bg: #3a3420;
     --border: #30363d;
   }
 }
@@ -36,37 +44,245 @@ body {
   background: var(--bg);
 }
 
+button {
+  font: inherit;
+  color: var(--fg);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+/* 通知バーの有無で行がずれないよう、グリッドではなく縦並びのフレックスにする */
 .app {
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 
-.app-header {
+/* ---- ツールバー ---- */
+.toolbar {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--panel);
   border-bottom: 1px solid var(--border);
 }
 
-.app-header h1 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+.toolbar-actions {
+  display: flex;
+  gap: 0.4rem;
 }
 
-.version {
+.toolbar-title {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dirty {
+  color: var(--accent);
+  margin-left: 0.4rem;
+}
+
+.notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.notice button {
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+/* ---- 2 ペイン ---- */
+.workspace {
+  flex: 1;
+  min-height: 0;
+}
+
+.split {
+  display: grid;
+  height: 100%;
+}
+
+.split-pane {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.split-divider {
+  cursor: col-resize;
+  background: var(--border);
+  border-left: 2px solid var(--bg);
+  border-right: 2px solid var(--bg);
+}
+
+.split-divider:hover,
+.split-divider:focus-visible {
+  background: var(--accent);
+  outline: none;
+}
+
+.editor {
+  height: 100%;
+}
+
+/* ---- プレビュー ---- */
+.preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--panel);
+}
+
+.preview-canvas {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* 図は常に白背景（PlantUML の既定の配色に合わせる） */
+.preview-canvas img {
+  max-width: 100%;
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.preview-canvas img.stale {
+  opacity: 0.55;
+}
+
+.preview-empty {
+  color: var(--muted);
+}
+
+.preview-error {
+  padding: 0.5rem 0.75rem;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-family: var(--mono);
+  border-top: 1px solid var(--border);
+}
+
+.setup-problem {
+  max-width: 34rem;
+  padding: 1rem 1.25rem;
+  background: var(--warn-bg);
+  border-radius: 8px;
+  line-height: 1.6;
+}
+
+.setup-problem h2 {
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+
+/* ---- ステータスバー ---- */
+.statusbar {
+  display: flex;
+  gap: 1rem;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.statusbar-render {
+  margin-left: auto;
+}
+
+/* ---- 設定ダイアログ ---- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.35);
+}
+
+.modal {
+  width: min(36rem, 92vw);
+  padding: 1.25rem;
+  background: var(--panel);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.25);
+}
+
+.modal h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.modal label {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.modal input {
+  font: inherit;
+  font-family: var(--mono);
+  padding: 0.35rem 0.5rem;
+  color: var(--fg);
+  background: var(--editor-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.modal .status {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.modal .status dd {
+  margin: 0;
+  word-break: break-all;
+}
+
+.modal .hint {
   color: var(--muted);
   font-size: 0.85rem;
 }
 
-.placeholder {
-  flex: 1;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  color: var(--muted);
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .error {

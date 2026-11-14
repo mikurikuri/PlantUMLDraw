@@ -1,0 +1,3 @@
+﻿@startuml
+Alice -> Bob : BOM 付き UTF-8
+@enduml

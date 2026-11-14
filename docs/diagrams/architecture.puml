@@ -1,0 +1,44 @@
+@startuml
+title PlantUMLDraw の構成（イテレーション 1 時点）
+
+package "フロントエンド（WebView / React + TypeScript）" {
+  [App] as App
+  [Editor\n(CodeMirror 6)] as Editor
+  [Preview] as Preview
+  [SettingsDialog] as Settings
+  [useLivePreview\n（300ms 待って描画・古い結果は破棄）] as Live
+  [documentState\n（未保存判定・タイトル）] as DocState
+  [lib/ipc.ts] as Ipc
+  [lib/dialogs.ts] as Dialogs
+}
+
+package "バックエンド（Rust / Tauri 2）" {
+  [lib.rs\n（コマンド・状態）] as Cmd
+  [document.rs\n（UTF-8・BOM・改行の保持）] as Doc
+  [renderer.rs\n（Renderer トレイト）] as Renderer
+  [settings.rs] as SettingsRs
+}
+
+node "Java 17+" as Java
+artifact "plantuml.jar\n（MIT 版・同梱）" as Jar
+database "settings.json\n（アプリ設定フォルダ）" as SettingsFile
+folder ".puml ファイル" as Files
+
+App --> Editor
+App --> Preview
+App --> Settings
+App --> Live
+App --> DocState
+App --> Dialogs : 開く/保存/確認\n(tauri-plugin-dialog)
+Live --> Ipc
+App --> Ipc
+Ipc --> Cmd : invoke
+
+Cmd --> Doc
+Cmd --> Renderer
+Cmd --> SettingsRs
+Doc --> Files
+SettingsRs --> SettingsFile
+Renderer --> Java : java -jar plantuml.jar\n-pipe -tsvg（標準入出力）
+Java --> Jar
+@enduml

@@ -39,14 +39,32 @@ java -version
 ## 2. 起動とテスト
 
 ```bash
-npm install          # 依存関係の導入（初回のみ）
-npm run tauri dev    # 開発モードで起動
-npm test             # フロントエンドの単体テスト
-npm run check        # lint・型チェック・フォーマット・Rust テストをまとめて実行
+npm install               # 依存関係の導入（初回のみ）
+npm run fetch:plantuml    # plantuml.jar（MIT 版）を vendor/ に取得（SHA-256 を検証。dev/build 時にも自動実行）
+npm run tauri dev         # 開発モードで起動
+npm test                  # フロントエンドの単体テスト
+npm run check             # lint・型チェック・フォーマット・単体テストをまとめて実行
+npm run test:integration  # 実際の Java と plantuml.jar を使う Rust の結合テスト
+npm run test:e2e          # アプリをビルドして E2E テスト（下記の準備が必要）
 ```
 
 Rust 側だけを操作する場合は `src-tauri/` で `cargo test` / `cargo clippy` を実行します。
-※ Rust のビルドには `dist/`（フロントエンドのビルド結果）が必要です。先に `npm run build` を実行してください。
+※ Rust のビルドには `dist/`（フロントエンドのビルド結果）と `vendor/plantuml.jar` が必要です。先に `npm run build` と `npm run fetch:plantuml` を実行してください。
+
+開発中にファイルを指定して起動するには `npm run tauri dev -- -- tests/fixtures/sequence.puml` のようにします。
+
+### E2E テストの準備
+
+E2E は [WebdriverIO](https://webdriver.io/) と `tauri-driver` で実際のアプリを操作します（`e2e/`）。
+
+```bash
+cargo install tauri-driver --locked
+```
+
+- **Windows**：`npm run test:e2e` が WebView2 と同じ版の msedgedriver を `vendor/msedgedriver/` に自動で取得します。
+- **Linux**：`webkit2gtk-driver` と `xvfb` を入れ、`xvfb-run npm run test:e2e` で実行します。
+
+アプリをビルド済みなら `npm run test:e2e:only` でテストだけを実行できます。
 
 ## 3. フォルダ構成
 
@@ -54,7 +72,11 @@ Rust 側だけを操作する場合は `src-tauri/` で `cargo test` / `cargo cl
 .
 ├─ src/            フロントエンド（React + TS）
 ├─ src-tauri/      バックエンド（Rust / Tauri）
+├─ src-tauri/tests/ Rust の結合テスト（実際の Java を使う）
+├─ e2e/            E2E テスト（WebdriverIO + tauri-driver）
 ├─ tests/fixtures/ テスト用の .puml サンプル（公開可能なもののみ）
+├─ scripts/        plantuml.jar・msedgedriver の取得スクリプト
+├─ vendor/         取得したバイナリ（Git 管理外）
 ├─ docs/           設計書・ADR・イテレーション記録
 └─ .github/        CI 設定
 ```

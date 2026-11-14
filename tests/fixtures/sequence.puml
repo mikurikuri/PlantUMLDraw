@@ -1,0 +1,10 @@
+@startuml
+title ログイン（サンプル）
+actor 利用者 as User
+participant "Web 画面" as Web
+participant "認証サービス" as Auth
+User -> Web : ID とパスワードを入力
+Web -> Auth : 認証要求
+Auth --> Web : トークン
+Web --> User : ホーム画面を表示
+@enduml
