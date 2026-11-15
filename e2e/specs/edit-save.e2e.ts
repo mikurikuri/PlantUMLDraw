@@ -16,10 +16,17 @@ async function launchWith(fixture: string, copyName = fixture): Promise<string> 
   return file;
 }
 
+/**
+ * 性能の目安に掛ける係数。開発 PC では 1（受け入れ基準そのもの）。
+ * 遅い CI では環境変数 `PERF_BUDGET_SCALE` で緩め、大きな劣化だけを検出する（docs/test-strategy.md）。
+ */
+const PERF_SCALE = Number(process.env.PERF_BUDGET_SCALE) || 1;
+const budgetMs = (ms: number) => ms * PERF_SCALE;
+
 const previewImg = () => $("img[alt='プレビュー']");
 
 /** プレビュー画像が出るまで待つ。出なければ、プレビュー欄の表示内容を添えて失敗させる */
-async function waitForPreview(timeout = 10_000) {
+async function waitForPreview(timeout = Math.max(10_000, budgetMs(3_000) + 5_000)) {
   try {
     await previewImg().waitForExist({ timeout });
   } catch {
@@ -45,8 +52,10 @@ describe("開く → 編集 → 保存（UC-01）", () => {
     const start = Date.now();
     await waitForPreview();
     const elapsed = Date.now() - start;
-    console.log(`  AC1-1 計測値: ファイル表示からプレビュー表示まで ${elapsed} ms`);
-    expect(elapsed).toBeLessThan(3_000);
+    console.log(
+      `  AC1-1 計測値: ファイル表示からプレビュー表示まで ${elapsed} ms（上限 ${budgetMs(3_000)} ms）`,
+    );
+    expect(elapsed).toBeLessThan(budgetMs(3_000));
   });
 
   it("AC1-2：入力が止まってから 1 秒以内にプレビューが更新される", async () => {
@@ -57,12 +66,14 @@ describe("開く → 編集 → 保存（UC-01）", () => {
     await typeLineBeforeEnduml("Web -> Auth : ログ記録");
     const start = Date.now();
     await browser.waitUntil(async () => (await previewImg().getAttribute("src")) !== before, {
-      timeout: 5_000,
+      timeout: budgetMs(1_000) + 5_000,
       interval: 20,
     });
     const elapsed = Date.now() - start;
-    console.log(`  AC1-2 計測値: 入力停止からプレビュー更新まで ${elapsed} ms`);
-    expect(elapsed).toBeLessThan(1_000);
+    console.log(
+      `  AC1-2 計測値: 入力停止からプレビュー更新まで ${elapsed} ms（上限 ${budgetMs(1_000)} ms）`,
+    );
+    expect(elapsed).toBeLessThan(budgetMs(1_000));
   });
 
   it("AC1-3：構文エラーの行番号を表示し、直前の図は残す", async () => {

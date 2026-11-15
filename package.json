@@ -20,7 +20,7 @@
     "check:rust": "npm run fetch:plantuml && cargo fmt --manifest-path src-tauri/Cargo.toml --check && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features -- -D warnings && cargo test --manifest-path src-tauri/Cargo.toml",
     "check": "npm run check:web && npm run check:rust",
     "fetch:plantuml": "node scripts/fetch-plantuml.mjs",
-    "test:integration": "npm run fetch:plantuml && cargo test --manifest-path src-tauri/Cargo.toml --features integration --test render_integration",
+    "test:integration": "npm run fetch:plantuml && cargo test --manifest-path src-tauri/Cargo.toml --features integration --test render_integration -- --test-threads=1 --nocapture",
     "fetch:msedgedriver": "node scripts/fetch-msedgedriver.mjs",
     "build:debug": "tauri build --debug --no-bundle",
     "test:e2e": "npm run fetch:msedgedriver && npm run build:debug && wdio run e2e/wdio.conf.ts",

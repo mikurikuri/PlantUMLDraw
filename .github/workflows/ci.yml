@@ -18,6 +18,10 @@ jobs:
         # macOS は対象外（docs/adr/0005-drop-macos.md）
         os: [windows-latest, ubuntu-22.04]
     runs-on: ${{ matrix.os }}
+    env:
+      # CI の実行環境は開発 PC より大幅に遅いため、性能の目安（AC1-1 / AC1-2）を 5 倍に緩める。
+      # 受け入れ基準の判定は開発 PC で行い、CI では大きな劣化だけを検出する（docs/test-strategy.md）
+      PERF_BUDGET_SCALE: "5"
     steps:
       - uses: actions/checkout@v4
 

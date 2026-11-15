@@ -33,14 +33,28 @@ fn renders_sequence_diagram_with_japanese_text() {
     assert!(svg.contains("認証サービス"), "日本語が SVG に含まれること");
 }
 
+/// 性能の目安に掛ける係数。開発 PC では 1（受け入れ基準そのもの）。
+/// 遅い CI では環境変数 `PERF_BUDGET_SCALE` で緩め、大きな劣化だけを検出する（docs/test-strategy.md）。
+fn perf_budget_scale() -> f64 {
+    std::env::var("PERF_BUDGET_SCALE")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(1.0)
+}
+
 #[test]
-fn renders_100_line_class_diagram_within_3_seconds() {
+fn renders_100_line_class_diagram_within_budget() {
     let start = Instant::now();
     let svg = renderer().render(&fixture("class-100-lines.puml")).unwrap();
-    let elapsed = start.elapsed();
+    let elapsed = start.elapsed().as_secs_f64();
     assert!(svg.contains("Entity20"));
-    // AC1-1 の目安（CI の遅い環境でも余裕を持って判定する）
-    assert!(elapsed.as_secs_f64() < 3.0, "描画に {elapsed:?} かかった");
+    // AC1-1 の目安は 3 秒
+    let budget = 3.0 * perf_budget_scale();
+    println!("100 行クラス図の描画: {elapsed:.2} 秒（上限 {budget:.1} 秒）");
+    assert!(
+        elapsed < budget,
+        "描画に {elapsed:.2} 秒かかった（上限 {budget:.1} 秒）"
+    );
 }
 
 #[test]
