@@ -38,12 +38,25 @@ async function waitForPreview(timeout = Math.max(10_000, budgetMs(3_000) + 5_000
 /**
  * `@enduml` の直前に 1 行入力する（フィクスチャは最終行が `@enduml` + 改行）。
  * `@enduml` より後ろに書いても図は変わらないため、必ず図の中に入れる。
+ *
+ * 入力する文字は ASCII に限り、`'` `"` `(` などの括弧・引用符は使わない。
+ * エディターが閉じ記号を自動で補ううえ、WebDriver の実装（OS）によって
+ * 日本語の前の空白が落ちるなど入力結果が変わるため（CI の Linux で発生）。
  */
 async function typeLineBeforeEnduml(text: string) {
+  if (/[^\x20-\x7e]|['"([{]/.test(text)) {
+    throw new Error(`E2E で入力する文字は括弧・引用符を含まない ASCII にしてください: ${text}`);
+  }
   await $(".cm-content").click();
   await browser.keys([Key.Ctrl, Key.End]);
   await browser.keys([Key.ArrowUp, Key.Home]);
   await browser.keys([...text.split(""), Key.Enter]);
+}
+
+/** Ctrl+S で保存し、未保存マークが消えるまで待つ */
+async function saveWithShortcut() {
+  await browser.keys([Key.Ctrl, "s"]);
+  await expect($("[data-testid='dirty-mark']")).not.toBeExisting({ wait: 10_000 });
 }
 
 describe("開く → 編集 → 保存（UC-01）", () => {
@@ -63,7 +76,7 @@ describe("開く → 編集 → 保存（UC-01）", () => {
     await waitForPreview();
     const before = await previewImg().getAttribute("src");
 
-    await typeLineBeforeEnduml("Web -> Auth : ログ記録");
+    await typeLineBeforeEnduml("Web -> Auth : e2e-update");
     const start = Date.now();
     await browser.waitUntil(async () => (await previewImg().getAttribute("src")) !== before, {
       timeout: budgetMs(1_000) + 5_000,
@@ -80,40 +93,43 @@ describe("開く → 編集 → 保存（UC-01）", () => {
     await launchWith("sequence.puml", "ac1-3.puml");
     await waitForPreview();
 
-    // 2 行目の末尾に改行して 3 行目に不正な行を入れる
+    // 2 行目の末尾で改行し、3 行目に不正な行を入れる
     await $(".cm-content").click();
     await browser.keys([Key.Ctrl, Key.Home]);
-    await browser.keys([Key.ArrowDown, Key.End]);
-    await browser.keys("\nthis is wrong".split(""));
+    await browser.keys([Key.ArrowDown, Key.End, Key.Enter]);
+    await browser.keys("this is wrong".split(""));
 
     const alert = $(".preview-error");
-    await expect(alert).toHaveText(expect.stringContaining("3 行目"), { wait: 5_000 });
+    await expect(alert).toHaveText(expect.stringContaining("3 行目"), {
+      wait: budgetMs(1_000) + 10_000,
+    });
     await expect(previewImg()).toBeExisting();
   });
 
   it("AC1-4：CRLF のファイルを編集して Ctrl+S すると、CRLF のまま保存される", async () => {
     const file = await launchWith("sequence-crlf.puml", "ac1-4-crlf.puml");
-    await typeLineBeforeEnduml("' 追記した行");
+    await typeLineBeforeEnduml("Alice -> Bob : e2e-crlf");
     await expect($("[data-testid='dirty-mark']")).toBeExisting();
+    await saveWithShortcut();
 
-    await browser.keys([Key.Ctrl, "s"]);
-    await expect($("[data-testid='dirty-mark']")).not.toBeExisting({ wait: 5_000 });
-
-    const saved = readFileSync(file);
-    const text = saved.toString("utf8");
-    expect(text).toContain("' 追記した行");
-    expect(text.replace(/\r\n/g, "")).not.toContain("\n"); // LF 単独の改行が無い
-    expect(saved.subarray(0, 3).toString("hex")).not.toBe("efbbbf"); // BOM は付けない
+    // 既存の日本語・改行コード・BOM なしを含め、バイト単位で期待どおりであること
+    expect(readFileSync(file).toString("hex")).toBe(
+      Buffer.from(
+        "@startuml\r\nAlice -> Bob : CRLF の改行\r\nAlice -> Bob : e2e-crlf\r\n@enduml\r\n",
+      ).toString("hex"),
+    );
   });
 
   it("AC1-4：BOM 付きのファイルは BOM を付けたまま保存される", async () => {
     const file = await launchWith("sequence-bom.puml", "ac1-4-bom.puml");
-    await typeLineBeforeEnduml("' BOM 確認");
-    await browser.keys([Key.Ctrl, "s"]);
-    await expect($("[data-testid='dirty-mark']")).not.toBeExisting({ wait: 5_000 });
+    await typeLineBeforeEnduml("Alice -> Bob : e2e-bom");
+    await saveWithShortcut();
 
-    const saved = readFileSync(file);
-    expect(saved.subarray(0, 3).toString("hex")).toBe("efbbbf");
-    expect(saved.toString("utf8")).toContain("' BOM 確認");
+    expect(readFileSync(file).toString("hex")).toBe(
+      Buffer.concat([
+        Buffer.from([0xef, 0xbb, 0xbf]),
+        Buffer.from("@startuml\nAlice -> Bob : BOM 付き UTF-8\nAlice -> Bob : e2e-bom\n@enduml\n"),
+      ]).toString("hex"),
+    );
   });
 });

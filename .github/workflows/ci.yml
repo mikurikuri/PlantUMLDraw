@@ -64,14 +64,13 @@ jobs:
       # アプリ本体のビルド（E2E で使う。インストーラー作成はフェーズ C）
       - run: npm run build:debug
 
+      # E2E は Linux のみ CI で実行する。
+      # Windows の GitHub ランナーでは msedgedriver からアプリを起動できない
+      # （DevToolsActivePort エラー）ため、Windows の E2E は開発 PC で `npm run test:e2e` を実行して確認する。
+      # 経緯：docs/iterations/it1.md「既知の課題」
       - name: Install tauri-driver
+        if: runner.os == 'Linux'
         run: cargo install tauri-driver --locked
-
-      - name: E2E (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          npm run fetch:msedgedriver
-          npm run test:e2e:only
 
       - name: E2E (Linux)
         if: runner.os == 'Linux'

@@ -53,6 +53,23 @@ Rust 側だけを操作する場合は `src-tauri/` で `cargo test` / `cargo cl
 
 開発中にファイルを指定して起動するには `npm run tauri dev -- -- tests/fixtures/sequence.puml` のようにします。
 
+### Windows の PowerShell で `npm` が実行できない場合
+
+「このシステムではスクリプトの実行が無効になっている」と表示される場合は、PowerShell の実行ポリシーで `npm.ps1` が止められています。次のどちらかで対処します。
+
+- `npm` の代わりに `npm.cmd` を使う（例：`npm.cmd run tauri dev`）。設定変更は不要です。
+- 自分のユーザーだけ実行ポリシーを緩める：`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`（会社の PC では社内ポリシーに従ってください）
+
+### ビルド済みの exe を直接起動するとき
+
+`src-tauri/target/debug/plantumldraw.exe` は、`npm run check` などのテストを実行すると **画面を含まない版に上書きされます**（起動すると「localhost 接続が拒否されました」と表示されます）。exe を直接起動する前に、必ず次を実行してください。
+
+```bash
+npm run build:debug
+```
+
+普段の動作確認には `npm run tauri dev` を使うのが確実です。
+
 ### E2E テストの準備
 
 E2E は [WebdriverIO](https://webdriver.io/) と `tauri-driver` で実際のアプリを操作します（`e2e/`）。
@@ -61,7 +78,7 @@ E2E は [WebdriverIO](https://webdriver.io/) と `tauri-driver` で実際のア�
 cargo install tauri-driver --locked
 ```
 
-- **Windows**：`npm run test:e2e` が WebView2 と同じ版の msedgedriver を `vendor/msedgedriver/` に自動で取得します。
+- **Windows**：`npm run test:e2e` が WebView2 と同じ版の msedgedriver を `vendor/msedgedriver/` に自動で取得します。CI（GitHub の Windows ランナー）では E2E を実行していないため、Windows に関わる変更をしたら開発 PC で実行してください。
 - **Linux**：`webkit2gtk-driver` と `xvfb` を入れ、`xvfb-run npm run test:e2e` で実行します。
 
 アプリをビルド済みなら `npm run test:e2e:only` でテストだけを実行できます。

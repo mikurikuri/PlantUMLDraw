@@ -15,10 +15,14 @@ import path from "node:path";
 const root = path.resolve(import.meta.dirname, "..");
 const isWindows = process.platform === "win32";
 
+/**
+ * テスト対象のアプリ。既定は `src-tauri/target/debug`。
+ * 別の場所にビルドした場合（CARGO_TARGET_DIR を変えた場合）は環境変数 `CARGO_TARGET_DIR` に合わせる。
+ */
 export const APP_PATH = path.join(
-  root,
-  "src-tauri",
-  "target",
+  process.env.CARGO_TARGET_DIR
+    ? path.resolve(process.env.CARGO_TARGET_DIR)
+    : path.join(root, "src-tauri", "target"),
   "debug",
   isWindows ? "plantumldraw.exe" : "plantumldraw",
 );
